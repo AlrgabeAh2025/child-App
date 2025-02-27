@@ -1,2 +1,5 @@
 flet
-pyscreenshot
+io
+qrcode
+base64
+requests
