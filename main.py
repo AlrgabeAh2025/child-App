@@ -30,7 +30,7 @@ def main(page: Page):
         appbar_theme=AppBarTheme(bgcolor="#110b22", color="#ffffff"),
     )
 
-    baseUrl = "http://192.168.6.192:2010"
+    baseUrl = "http://192.168.244.135:2010"
 
     def showMessage(text):
         snack_bar = SnackBar(
