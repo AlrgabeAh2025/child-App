@@ -1,5 +1,3 @@
 flet
-io
-qrcode
-base64
+qrcode[pil]
 requests
