@@ -212,7 +212,7 @@ class Home(View):
                                             trailing=Switch(
                                                 value=False,
                                                 active_color="#110b22",
-                                                on_click=lambda x: self.startGetScreenShot()
+                                                
                                             ),
                                             subtitle=Text(
                                                 "مغلق",
@@ -229,6 +229,7 @@ class Home(View):
                                 border=border.all(0.5, "#110b22"),
                                 border_radius=border_radius.all(5),
                                 alignment=alignment.center,
+                                on_click=lambda x: self.startGetScreenShot()
                                 
                             ),
                             Container(
