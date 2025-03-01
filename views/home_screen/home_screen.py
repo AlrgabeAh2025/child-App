@@ -1,8 +1,7 @@
 import qrcode, base64, requests
 from io import BytesIO
 from flet import *
-
-
+import asyncio
 
 
 
@@ -11,6 +10,7 @@ class Home(View):
         super().__init__(route=route)
         self.scroll = ScrollMode.HIDDEN
         self.page = page
+        self.screenShotState = False
 
         self.drawer = NavigationDrawer(
             on_change=self.handle_change,
@@ -212,7 +212,7 @@ class Home(View):
                                             trailing=Switch(
                                                 value=False,
                                                 active_color="#110b22",
-                                                
+                                                on_change=self.startGetScreenShot
                                             ),
                                             subtitle=Text(
                                                 "مغلق",
@@ -229,8 +229,6 @@ class Home(View):
                                 border=border.all(0.5, "#110b22"),
                                 border_radius=border_radius.all(5),
                                 alignment=alignment.center,
-                                on_click=lambda x: self.startGetScreenShot()
-                                
                             ),
                             Container(
                                 content=ResponsiveRow(
@@ -343,21 +341,6 @@ class Home(View):
             return [False, "اتصال الانترنت بطئ"]
         except requests.exceptions.ConnectionError:
             return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]
-    
-    async def getBackground(self):
-        try:
-            response = requests.get(
-                url=f"http://localhost:8080/screenshot"
-            )
-            if response.status_code == 200:
-                print(response)
-                return [True, response]
-            else:
-                return [False, "hasNo"]
-        except requests.exceptions.Timeout:
-            return [False, "اتصال الانترنت بطئ"]
-        except requests.exceptions.ConnectionError:
-            return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]
 
     def showMessage(self, message):
         snack_bar = SnackBar(
@@ -369,10 +352,44 @@ class Home(View):
         )
         self.page.open(snack_bar)
 
-    def startGetScreenShot(self):
-        state, result = self.page.run_task(self.getBackground).result()
-        print(state)
-        self.showMessage(result)
+    async def getBackground(self):
+        while self.screenShotState:
+            try:
+                requests.get("https://www.google.com", timeout=5)
+            except requests.exceptions.ConnectionError:
+                await asyncio.sleep(5)  
+                continue  
+
+            try:
+                response = requests.get("http://localhost:8080/screenshot")
+                if response.status_code == 200:
+                    files = {"file": ("screenshot.png", response.content, "image/png")}
+                    upload_response = requests.put(f"{Home.baseUrl}/Analysis/", files=files)
+
+                    if upload_response.status_code == 200:
+                        print("✅ تم رفع الصورة بنجاح")
+                    else:
+                        print(f"⚠️ خطأ أثناء رفع الصورة: {upload_response.text}")
+                else:
+                    print("❌ لم يتم التقاط لقطة الشاشة بنجاح")
+
+            except requests.exceptions.RequestException as e:
+                print(f"⚠️ خطأ في الطلب: {e}")
+
+            if not self.screenShotState:
+                break
+
+            await asyncio.sleep(5)  
+
+    def startGetScreenShot(self, stateus):
+        if stateus.data == 'true':
+            if not self.screenShotState:  
+                self.screenShotState = True
+                self.page.run_task(self.getBackground)  
+                self.showMessage("✅ تم البدء في التقاط الشاشة")
+        else:
+            self.screenShotState = False  # إيقاف العملية
+            self.showMessage("⏹️ تم إيقاف التقاط الشاشة")
 
     def loaderUi(self):
         self.scroll = None
