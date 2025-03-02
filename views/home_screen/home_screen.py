@@ -4,13 +4,13 @@ from flet import *
 import asyncio
 
 
-
 class Home(View):
+
     def __init__(self, route, page):
         super().__init__(route=route)
         self.scroll = ScrollMode.HIDDEN
-        self.page = page
         self.screenShotState = False
+        self.UsageStatsState = False
 
         self.drawer = NavigationDrawer(
             on_change=self.handle_change,
@@ -171,7 +171,6 @@ class Home(View):
                         controls=[
                             Container(
                                 content=Image(src="images/father.png", width=150),
-                                # border_radius=border_radius.all(150),
                             ),
                             Container(
                                 content=Text(
@@ -186,7 +185,7 @@ class Home(View):
                             ResponsiveRow(
                                 controls=[
                                     Text(
-                                        "البيانات التي يتم مر اقبتها",
+                                        "البيانات التي يتم مراقبتها",
                                         style=TextStyle(
                                             size=12,
                                             weight=FontWeight.BOLD,
@@ -210,9 +209,9 @@ class Home(View):
                                                 ),
                                             ),
                                             trailing=Switch(
-                                                value=False,
+                                                value=self.UsageStatsState,
                                                 active_color="#110b22",
-                                                on_change=self.startGetScreenShot
+                                                on_change=self.startGetUsageStats
                                             ),
                                             subtitle=Text(
                                                 "مغلق",
@@ -243,8 +242,9 @@ class Home(View):
                                                 ),
                                             ),
                                             trailing=Switch(
-                                                value=False,
+                                                value=self.screenShotState,
                                                 active_color="#110b22",
+                                                on_change=self.startGetScreenShot,
                                             ),
                                             subtitle=Text(
                                                 "مغلق",
@@ -310,6 +310,10 @@ class Home(View):
         self.update()
 
     def did_mount(self):
+        self.screenShotState = self.page.client_storage.get("screenShotState")
+        self.UsageStatsState = self.page.client_storage.get("UsageStatsState")
+        self.page.run_task(self.getUsageStats)
+        self.page.run_task(self.getBackground)
         self.loaderUi()
         self.checkIsThereFather()
 
@@ -333,7 +337,9 @@ class Home(View):
             response = requests.head(
                 url=f"{Home.baseUrl}/{url}/", data=body, headers=headers
             )
+            
             if response.status_code == 200:
+                print(response)
                 return [True, "has"]
             else:
                 return [False, "hasNo"]
@@ -342,29 +348,27 @@ class Home(View):
         except requests.exceptions.ConnectionError:
             return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]
 
-    def showMessage(self, message):
-        snack_bar = SnackBar(
-            content=Text(
-                f"{message}",
-                style=TextStyle(size=15, font_family="ElMessiri"),
-            ),
-            show_close_icon=True,
-        )
-        self.page.open(snack_bar)
-
     async def getBackground(self):
+        access = await self.page.client_storage.get_async("access")
+        headers = {
+            "Authorization": f"Bearer {access}",
+            "Accept": "*/*",
+            "Cache-Control": "no-cache",
+        }
         while self.screenShotState:
             try:
                 requests.get("https://www.google.com", timeout=5)
             except requests.exceptions.ConnectionError:
-                await asyncio.sleep(5)  
-                continue  
+                await asyncio.sleep(5)
+                continue
 
             try:
-                response = requests.get("http://localhost:8080/screenshot")
+                response = requests.post("http://localhost:8080/screenshot")
                 if response.status_code == 200:
                     files = {"file": ("screenshot.png", response.content, "image/png")}
-                    upload_response = requests.put(f"{Home.baseUrl}/Analysis/", files=files)
+                    upload_response = requests.put(
+                        f"{Home.baseUrl}/Analysis/", files=files, headers=headers
+                    )
 
                     if upload_response.status_code == 200:
                         print("✅ تم رفع الصورة بنجاح")
@@ -379,17 +383,89 @@ class Home(View):
             if not self.screenShotState:
                 break
 
-            await asyncio.sleep(5)  
+            await asyncio.sleep(5)
+
+    async def getUsageStats(self):
+        access = await self.page.client_storage.get_async("access")
+        headers = {
+            "Authorization": f"Bearer {access}",
+            "Accept": "*/*",
+            "Cache-Control": "no-cache",
+        }
+        while self.UsageStatsState:
+            try:
+                requests.get("https://www.google.com", timeout=5)
+            except requests.exceptions.ConnectionError:
+                await asyncio.sleep(5)
+                continue
+
+            try:
+                response = requests.get("http://localhost:8080/usage-stats")
+                if response.status_code == 200:
+                    upload_response = requests.post(
+                        f"{Home.baseUrl}/mostUseApps/", data=response.json(), headers=headers
+                    )
+                    if upload_response.status_code == 200:
+                        print("✅ تم رفع الصورة بنجاح")
+                    else:
+                        print(f"⚠️ خطأ أثناء رفع الصورة: {upload_response.text}")
+                else:
+                    print("❌ لم يتم التقاط لقطة الشاشة بنجاح")
+
+            except requests.exceptions.RequestException as e:
+                print(f"⚠️ خطأ في الطلب: {e}")
+
+            if not self.UsageStatsState:
+                break
+
+            await asyncio.sleep(5)
+
+    def showMessage(self, message):
+        snack_bar = SnackBar(
+            content=Text(
+                f"{message}",
+                style=TextStyle(size=15, font_family="ElMessiri"),
+            ),
+            show_close_icon=True,
+        )
+        self.page.open(snack_bar)
 
     def startGetScreenShot(self, stateus):
-        if stateus.data == 'true':
-            if not self.screenShotState:  
-                self.screenShotState = True
-                self.page.run_task(self.getBackground)  
-                self.showMessage("✅ تم البدء في التقاط الشاشة")
+        def start(self):
+            if stateus.data == "true":
+                if not self.screenShotState:
+                    self.page.client_storage.set("screenShotState", True)
+                    self.screenShotState = True  
+                    self.page.run_task(self.getBackground)
+                    self.showMessage("✅ تم البدء في التقاط الشاشة")
+            else:
+                self.screenShotState = False  
+                self.page.client_storage.set("screenShotState", False)
+                self.showMessage("⏹️ تم إيقاف التقاط الشاشة")
+        if self.page.client_storage.contains_key("screenShotState"):
+            start(self)
         else:
-            self.screenShotState = False  # إيقاف العملية
-            self.showMessage("⏹️ تم إيقاف التقاط الشاشة")
+            self.page.client_storage.set("screenShotState" , True)
+            start(self)
+
+    def startGetUsageStats(self, stateus):
+        def start(self):
+            if stateus.data == "true":
+                if not self.UsageStatsState:
+                    self.UsageStatsState = True
+                    self.page.client_storage.set("UsageStatsState", True)
+                    self.page.run_task(self.getUsageStats)
+                    self.showMessage("✅ تم البدء في مراقبة التطبقات ")
+            else:
+                self.UsageStatsState = False
+                self.page.client_storage.set("UsageStatsState", False) 
+                self.showMessage("⏹️ تم إيقاف  مراقبة التطبيقات")
+                
+        if self.page.client_storage.contains_key("UsageStatsState"):
+            start(self)
+        else:
+            self.page.client_storage.set("UsageStatsState" , True)
+            start(self)
 
     def loaderUi(self):
         self.scroll = None
@@ -425,3 +501,7 @@ class Home(View):
             self.hasNoFather()
         else:
             self.hasFatherScreen()
+
+    def will_unmount(self):
+        self.screenShotState = False
+        self.UsageStatsState = False

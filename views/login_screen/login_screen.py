@@ -176,6 +176,9 @@ class Login(View):
                     "last_name":json["last_name"],
                     "profileImage":json["profileImage"],
                     "key":json["key"],
+                    "father_first_name":json["father_first_name"],
+                    "father_last_name":json["father_last_name"],
+                    "father_gender":json["father_gender"],
                 }
                 await self.page.client_storage.set_async("userData", userData)
                 return [True, json]
@@ -185,7 +188,6 @@ class Login(View):
             return [False, "اتصال الانترنت بطئ"]
         except requests.exceptions.ConnectionError:
             return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]
-            
     # Function to handle the login event when the user clicks the login button
     def LoginEvent(self):
         if self.checkTextBoxes():
