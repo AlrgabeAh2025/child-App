@@ -5,69 +5,69 @@ class Login(View):
     def __init__(self, route, page):
         super().__init__(
             route=route
-        )  # Calls the constructor of the parent class (View)
-        self.rtl = True
+        )  # استدعاء مُنشئ الفئة الأم (View)
+        self.rtl = True  # تمكين النص من اليمين إلى اليسار للغة العربية
 
-        self.scroll = ScrollMode.AUTO
-        # Creates a username text field with styling and validation options
+        self.scroll = ScrollMode.AUTO  # تمكين التمرير التلقائي
+        # إنشاء حقل إدخال اسم المستخدم مع التنسيق وخيارات التحقق
         self.userNameTextBox = TextField(
-            label="اســـم المــستخدم",  # Label in Arabic
-            border_radius=border_radius.all(22),  # Rounded borders for the text field
-            border_color="#171335",  # Border color
+            label="اســـم المــستخدم",  # تسمية الحقل بالعربية
+            border_radius=border_radius.all(22),  # حواف مستديرة للحقل
+            border_color="#171335",  # لون الحواف
             text_style=TextStyle(
                 size=15, font_family="ElMessiri"
-            ),  # Text style for input
+            ),  # تنسيق النص المدخل
             label_style=TextStyle(
                 size=18, font_family="ElMessiri"
-            ),  # Text style for label
+            ),  # تنسيق تسمية الحقل
         )
 
-        # Creates a password text field with options to reveal password and styling
+        # إنشاء حقل إدخال كلمة المرور مع خيار إظهار/إخفاء كلمة المرور والتنسيق
         self.passwordTextBox = TextField(
-            label="كــلمة المــرور",  # Label in Arabic
-            password=True,  # Indicates this is a password field
-            can_reveal_password=True,  # Option to reveal password
-            border_radius=border_radius.all(22),  # Rounded borders for the text field
-            border_color="#171335",  # Border color
+            label="كــلمة المــرور",  # تسمية الحقل بالعربية
+            password=True,  # جعل الحقل خاصًا بإدخال كلمة المرور
+            can_reveal_password=True,  # إمكانية إظهار/إخفاء كلمة المرور
+            border_radius=border_radius.all(22),  # حواف مستديرة للحقل
+            border_color="#171335",  # لون الحواف
             text_style=TextStyle(
                 size=15, font_family="ElMessiri"
-            ),  # Text style for input
+            ),  # تنسيق النص المدخل
             label_style=TextStyle(
                 size=18, font_family="ElMessiri"
-            ),  # Text style for label
+            ),  # تنسيق تسمية الحقل
         )
 
     def did_mount(self):
-        self.loginUi()
+        self.loginUi()  # استدعاء واجهة تسجيل الدخول عند تحميل الصفحة
 
     def loginUi(self):
-        self.scroll = ScrollMode.AUTO
-        self.controls.clear()
+        self.scroll = ScrollMode.AUTO  # تمكين التمرير التلقائي
+        self.controls.clear()  # مسح العناصر الحالية في الواجهة
         self.controls.append(
             ResponsiveRow(
                 controls=[
                     Row(
                         controls=[
-                            # Back button to navigate to the previous page
+                            # زر العودة للصفحة السابقة
                             IconButton(
                                 icon=icons.ARROW_BACK,
                                 on_click=lambda x: self.page.go("/"),
                             )
                         ],
                         expand=False,
-                        alignment=MainAxisAlignment.START,
+                        alignment=MainAxisAlignment.START,  # محاذاة الزر إلى اليسار
                     ),
                     Column(
                         controls=[
-                            # Logo image displayed at the top of the login screen
+                            # صورة الشعار في أعلى واجهة تسجيل الدخول
                             ResponsiveRow(
                                 controls=[
                                     Image(
-                                        src="/images/logo.png",  # Logo image source
-                                        fit=ImageFit.COVER,  # Image fit type
+                                        src="/images/logo.png",  # مسار صورة الشعار
+                                        fit=ImageFit.COVER,  # طريقة عرض الصورة
                                         border_radius=border_radius.all(
                                             20.0
-                                        ),  # Rounded corners for the image
+                                        ),  # حواف مستديرة للصورة
                                         col={
                                             "xs": 10,
                                             "sm": 10,
@@ -78,97 +78,98 @@ class Login(View):
                                     ),
                                 ],
                                 expand=False,
-                                alignment=MainAxisAlignment.CENTER,
+                                alignment=MainAxisAlignment.CENTER,  # محاذاة الصورة في المنتصف
                             ),
-                            # Title text displayed on top
+                            # نص العنوان في أعلى الواجهة
                             Text(
-                                "حماية الاطفال",  # Title in Arabic
+                                "حماية الاطفال",  # العنوان بالعربية
                                 size=20,
                                 weight=FontWeight.BOLD,
                                 font_family="ElMessiri",
                             ),
-                            Container(height=10),  # Spacer between elements
-                            self.userNameTextBox,  # Username text box
-                            Container(height=10),  # Spacer between elements
-                            self.passwordTextBox,  # Password text box
-                            Container(height=20),  # Spacer between elements
+                            Container(height=10),  # مسافة بين العناصر
+                            self.userNameTextBox,  # حقل إدخال اسم المستخدم
+                            Container(height=10),  # مسافة بين العناصر
+                            self.passwordTextBox,  # حقل إدخال كلمة المرور
+                            Container(height=20),  # مسافة بين العناصر
                             ResponsiveRow(
                                 controls=[
-                                    # Login button to trigger login event
+                                    # زر تسجيل الدخول
                                     ElevatedButton(
-                                        "تسجيل الدخول",  # Button label in Arabic
+                                        "تسجيل الدخول",  # نص الزر بالعربية
                                         style=ButtonStyle(
                                             shape=RoundedRectangleBorder(
                                                 radius=22
-                                            ),  # Rounded button corners
-                                            bgcolor="#171335",  # Button background color
-                                            color="#ffffff",  # Button text color
+                                            ),  # حواف مستديرة للزر
+                                            bgcolor="#171335",  # لون خلفية الزر
+                                            color="#ffffff",  # لون نص الزر
                                             text_style=TextStyle(
                                                 size=15,
                                                 weight=FontWeight.BOLD,
-                                                font_family="ElMessiri",  # Text style for button text
+                                                font_family="ElMessiri",  # تنسيق نص الزر
                                             ),
-                                            padding=5,  # Padding for the button
+                                            padding=5,  # الحشو الداخلي للزر
                                         ),
-                                        on_click=lambda e: self.LoginEvent(),  # Trigger LoginEvent when clicked
+                                        on_click=lambda e: self.LoginEvent(),  # حدث النقر على الزر
                                     ),
                                 ]
                             ),
                         ],
-                        horizontal_alignment=CrossAxisAlignment.CENTER,
-                        alignment=MainAxisAlignment.CENTER,
+                        horizontal_alignment=CrossAxisAlignment.CENTER,  # محاذاة العناصر في المنتصف
+                        alignment=MainAxisAlignment.CENTER,  # محاذاة العناصر في المنتصف
                     ),
                 ],
-                expand=True,
+                expand=True,  # توسيع الصف لملء المساحة المتاحة
             )
         )
-        self.update()
-    # Function to generate and return the loader UI (Progress Ring)
+        self.update()  # تحديث الواجهة
+
+    # وظيفة لإنشاء واجهة التحميل (حلقة التقدم)
     def loaderUi(self):
-        self.scroll = None
+        self.scroll = None  # تعطيل التمرير
         return Column(
             controls=[
                 Container(
-                    content=ProgressRing(visible=True),  # Progress ring loader
-                    alignment=alignment.center,
-                    height=float("inf"),  # Make the container take full height
-                    expand=True,  # Ensure the container expands to fill available space
+                    content=ProgressRing(visible=True),  # حلقة التقدم
+                    alignment=alignment.center,  # محاذاة الحلقة في المنتصف
+                    height=float("inf"),  # جعل الحاوية تأخذ الارتفاع الكامل
+                    expand=True,  # توسيع الحاوية لملء المساحة المتاحة
                 ),
             ],
-            expand=True,  # Make the column expand to take up all available space
+            expand=True,  # توسيع العمود لملء المساحة المتاحة
         )
 
     def checkTextBoxes(self):
-        if not self.userNameTextBox.value:  # Check if username is empty
+        if not self.userNameTextBox.value:  # التحقق من أن حقل اسم المستخدم غير فارغ
             self.userNameTextBox.error = Text(
                 "الرجاء ادخال اسم المستخدم"
-            )  # Display error for empty username
-            self.update()  # Update the view to show the error
+            )  # عرض رسالة خطأ
+            self.update()  # تحديث الواجهة لعرض الخطأ
             return False
-        elif not self.passwordTextBox.value:  # Check if password is empty
+        elif not self.passwordTextBox.value:  # التحقق من أن حقل كلمة المرور غير فارغ
             self.passwordTextBox.error = Text(
                 "الرجاء ادخال كلمة المرور "
-            )  # Display error for empty password
+            )  # عرض رسالة خطأ
             self.update()
             return False
         else:
             self.userNameTextBox.error = (
-                None  # Clear any existing error on the username field
+                None  # إزالة أي رسالة خطأ من حقل اسم المستخدم
             )
             self.passwordTextBox.error = (
-                None  # Clear any existing error on the password field
+                None  # إزالة أي رسالة خطأ من حقل كلمة المرور
             )
             self.update()
             return True
 
     async def loginRequest(self, userName, password):
-        body = {"username": userName, "password": password , "userType": 1}
+        body = {"username": userName, "password": password , "userType": 1}  # بيانات الطلب
         try:
-            response = requests.post(url=f"{Login.baseUrl}/login/", data=body)
-            json = response.json()
-            if response.status_code == 200:
-                await self.page.client_storage.set_async("access", json["access"])
-                await self.page.client_storage.set_async("refresh", json["refresh"])
+            response = requests.post(url=f"{Login.baseUrl}/login/", data=body)  # إرسال الطلب
+            json = response.json()  # تحويل الاستجابة إلى JSON
+            if response.status_code == 200:  # إذا كانت الاستجابة ناجحة
+                await self.page.client_storage.set_async("access", json["access"])  # حفظ رمز الوصول
+                await self.page.client_storage.set_async("refresh", json["refresh"])  # حفظ رمز التحديث
                 userData = {
                     "username":json["username"],
                     "gender":json["gender"],
@@ -179,39 +180,46 @@ class Login(View):
                     "father_first_name":json["father_first_name"],
                     "father_last_name":json["father_last_name"],
                     "father_gender":json["father_gender"],
+                } if json.get("father_first_name") else {
+                    "username":json["username"],
+                    "gender":json["gender"],
+                    "first_name":json["first_name"],
+                    "last_name":json["last_name"],
+                    "profileImage":json["profileImage"],
+                    "key":json["key"],
                 }
-                await self.page.client_storage.set_async("userData", userData)
-                return [True, json]
+                await self.page.client_storage.set_async("userData", userData)  # حفظ بيانات المستخدم
+                return [True, json]  # إرجاع النتيجة الناجحة
             else:
-                return [False, json["non_field_errors"][0]]
+                return [False, json["non_field_errors"][0]]  # إرجاع رسالة الخطأ
         except requests.exceptions.Timeout:
-            return [False, "اتصال الانترنت بطئ"]
+            return [False, "اتصال الانترنت بطئ"]  # إرجاع رسالة خطأ في حالة انتهاء المهلة
         except requests.exceptions.ConnectionError:
-            return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]
-    # Function to handle the login event when the user clicks the login button
+            return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]  # إرجاع رسالة خطأ في حالة فشل الاتصال
+
+    # وظيفة التعامل مع حدث تسجيل الدخول
     def LoginEvent(self):
-        if self.checkTextBoxes():
-            self.controls.clear()  # Clear the current controls from the view
-            self.controls.append(self.loaderUi())  # Add the loader UI to show progress
-            self.update()  # Update the view to display the loader
-            # Simulate login request (authentication process)
+        if self.checkTextBoxes():  # التحقق من صحة الحقول
+            self.controls.clear()  # مسح العناصر الحالية
+            self.controls.append(self.loaderUi())  # عرض واجهة التحميل
+            self.update()  # تحديث الواجهة
+            # محاكاة طلب تسجيل الدخول
             authState = self.page.run_task(
                 self.loginRequest,
                 self.userNameTextBox.value,
                 self.passwordTextBox.value,
             ).result()
-            print(authState)
-            if authState[0]:  # If authentication is successful, navigate to the home page
-                self.page.go("/home")
-            else:  # If authentication fails, revert to the login UI
-                self.controls.clear()  # Clear the controls again
-                self.loginUi()  # Add the login form UI back
+            if authState[0]:  # إذا كان تسجيل الدخول ناجحًا
+                self.page.go("/home")  # الانتقال إلى الصفحة الرئيسية
+            else:  # إذا فشل تسجيل الدخول
+                self.controls.clear()  # مسح العناصر الحالية
+                self.loginUi()  # إعادة عرض واجهة تسجيل الدخول
                 snack_bar = SnackBar(
                     content=Text(
-                        f"{authState[1]}",
+                        f"{authState[1]}",  # عرض رسالة الخطأ
                         style=TextStyle(size=15, font_family="ElMessiri"),
                     ),
-                    show_close_icon=True,
+                    show_close_icon=True,  # إظهار زر الإغلاق
                 )
-                self.page.open(snack_bar)
-                self.update()  # Update the view to reflect the changes()()
+                self.page.open(snack_bar)  # عرض رسالة الخطأ
+                self.update()  # تحديث الواجهة

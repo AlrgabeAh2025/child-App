@@ -6,62 +6,79 @@ import asyncio
 
 class Home(View):
 
+    # دالة البناء (Constructor)
+    # تهيئة الكلاس وتعيين المتغيرات الأولية
     def __init__(self, route, page):
-        super().__init__(route=route)
-        self.scroll = ScrollMode.HIDDEN
-        self.screenShotState = False
-        self.UsageStatsState = False
+        super().__init__(route=route)  # استدعاء مُنشئ الفئة الأم (View)
+        self.page = page  # تعيين الصفحة الحالية
+        self.scroll = ScrollMode.ALWAYS  # تمكين التمرير دائمًا
+        self.screenShotState = False  # حالة مراقبة الشاشة (إيقاف بشكل افتراضي)
+        self.UsageStatsState = (
+            False  # حالة مراقبة استخدام التطبيقات (إيقاف بشكل افتراضي)
+        )
+        self.checkIsThereFatherVar = True  # متغير للتحقق من وجود أب مرتبط
 
+        # إنشاء قائمة التنقل الجانبية
         self.drawer = NavigationDrawer(
-            on_change=self.handle_change,
+            on_change=self.handle_change,  # حدث تغيير العنصر المحدد
             controls=[
-                Container(height=12),
+                Container(height=12),  # مسافة بين العناصر
                 NavigationDrawerDestination(
-                    label="الرئيسية",
-                    icon_content=Icon(icons.HOME_OUTLINED),
-                    selected_icon_content=Icon(icons.HOME),
+                    label="الرئيسية",  # عنصر القائمة الرئيسية
+                    icon_content=Icon(icons.HOME_OUTLINED),  # أيقونة غير محددة
+                    selected_icon_content=Icon(icons.HOME),  # أيقونة محددة
                 ),
                 NavigationDrawerDestination(
-                    label="تسجيل الخروج",
-                    icon_content=Icon(icons.LOGOUT_OUTLINED),
-                    selected_icon_content=Icon(icons.LOGOUT),
+                    label="تسجيل الخروج",  # عنصر تسجيل الخروج
+                    icon_content=Icon(icons.LOGOUT_OUTLINED),  # أيقونة غير محددة
+                    selected_icon_content=Icon(icons.LOGOUT),  # أيقونة محددة
                 ),
             ],
         )
 
+        # إنشاء شريط التطبيق (AppBar)
         self.appbar = AppBar(
             actions=[
                 IconButton(
-                    icon=icons.PERSON,
-                    icon_color="#ffffff",
-                    on_click=lambda x: self.page.go("/Profile"),
+                    icon=icons.PERSON,  # أيقونة الملف الشخصي
+                    icon_color="#ffffff",  # لون الأيقونة
+                    on_click=lambda x: self.page.go(
+                        "/Profile"
+                    ),  # حدث النقر للانتقال إلى الملف الشخصي
                 ),
             ],
             leading=IconButton(
-                icon=icons.MENU,
-                icon_color="#ffffff",
-                on_click=lambda e: self.page.open(self.drawer),
+                icon=icons.MENU,  # أيقونة القائمة
+                icon_color="#ffffff",  # لون الأيقونة
+                on_click=lambda e: self.page.open(
+                    self.drawer
+                ),  # حدث النقر لفتح القائمة الجانبية
             ),
-            toolbar_height=100,
+            toolbar_height=100,  # ارتفاع شريط التطبيق
             title=Text(
-                "حماية الاطفال",
+                "حماية الاطفال",  # عنوان شريط التطبيق
                 size=20,
                 weight=FontWeight.BOLD,
-                color="#ffffff",
-                font_family="ElMessiri",
+                color="#ffffff",  # لون النص
+                font_family="ElMessiri",  # نوع الخط
             ),
         )
 
+    # دالة نسخ النص إلى الحافظة
+    # تقوم بنسخ النص الممرر إليها وعرض رسالة تأكيد
     def copy(self, data):
-        self.page.set_clipboard(data)
-        self.page.open(SnackBar(Text("تم نسخ المفتاح"), open=True))
-        self.page.update()
+        self.page.set_clipboard(data)  # نسخ النص إلى الحافظة
+        self.page.open(
+            SnackBar(Text("تم نسخ المفتاح"), open=True)
+        )  # عرض رسالة نجاح النسخ
+        self.page.update()  # تحديث الصفحة
 
-    def hasNoFather(self):
-        self.scroll = ScrollMode.ALWAYS
-        userData = self.page.client_storage.get("userData")
-        qr = self.generateQr(userData)
-        self.controls.clear()
+    # دالة عرض واجهة المستخدم عندما لا يوجد أب مرتبط
+    # تعرض واجهة تحتوي على رمز QR ومفتاح المستخدم للاقتران
+    def hasNoFather(self, userData):
+        self.scroll = ScrollMode.ALWAYS  # تمكين التمرير
+        qr = self.generateQr(userData)  # إنشاء رمز QR
+        self.controls.clear()  # مسح العناصر الحالية
         self.controls.append(
             ResponsiveRow(
                 controls=[
@@ -69,130 +86,140 @@ class Home(View):
                         content=Column(
                             controls=[
                                 ListTile(
-                                    leading=Icon(icons.INFO),
+                                    leading=Icon(icons.INFO),  # أيقونة المعلومات
                                     title=Text(
-                                        "امسح رمز (QR) بالاسفل للاقتران بهاذة الجهاز",
+                                        "امسح رمز (QR) بالاسفل للاقتران بهاذة الجهاز",  # نص التعليمات
                                         size=13,
                                         weight=FontWeight.NORMAL,
-                                        color="#666666",
-                                        font_family="ElMessiri",
+                                        color="#666666",  # لون النص
+                                        font_family="ElMessiri",  # نوع الخط
                                     ),
                                 ),
                                 Container(
                                     content=Text(
-                                        "اولا يجب ان تقوم بإنشاء حساب في هاتف الاب ثم يمكنك مسح رمز (QR) بالاسفل للاقتران مع هذا الجهاز",
+                                        "اولا يجب ان تقوم بإنشاء حساب في هاتف الاب ثم يمكنك مسح رمز (QR) بالاسفل للاقتران مع هذا الجهاز",  # نص التعليمات
                                         size=13,
                                         weight=FontWeight.NORMAL,
-                                        color="#666666",
-                                        font_family="ElMessiri",
+                                        color="#666666",  # لون النص
+                                        font_family="ElMessiri",  # نوع الخط
                                     ),
-                                    padding=10,
+                                    padding=10,  # الحشو الداخلي
                                 ),
                             ]
                         ),
-                        bgcolor="#ffffff",
-                        border=border.all(color="#110b22", width=1),
-                        border_radius=border_radius.all(10),
+                        bgcolor="#ffffff",  # لون الخلفية
+                        border=border.all(color="#110b22", width=1),  # إطار الحاوية
+                        border_radius=border_radius.all(10),  # حواف مستديرة
                     ),
-                    Container(height=10),
+                    Container(height=10),  # مسافة بين العناصر
                     Container(
                         content=Text(
-                            "ادخل هذا في هاتف الاب للأقتران بالجهاز",
+                            "ادخل هذا في هاتف الاب للأقتران بالجهاز",  # نص التعليمات
                             size=13,
                             weight=FontWeight.NORMAL,
-                            color="#666666",
-                            font_family="ElMessiri",
+                            color="#666666",  # لون النص
+                            font_family="ElMessiri",  # نوع الخط
                         ),
                     ),
                     Container(
                         content=ListTile(
                             title=Text(
-                                f"{userData['key']}",
+                                f"{userData['key']}",  # عرض مفتاح المستخدم
                                 style=TextStyle(
                                     size=11,
                                     weight=FontWeight.BOLD,
-                                    font_family="ElMessiri",
+                                    font_family="ElMessiri",  # نوع الخط
                                 ),
                             ),
                             trailing=IconButton(
-                                icon=icons.COPY,
+                                icon=icons.COPY,  # أيقونة النسخ
                             ),
                         ),
-                        bgcolor="#ffffff",
-                        border=border.all(0.5, "#110b22"),
-                        border_radius=border_radius.all(5),
-                        on_click=lambda x: self.copy(f"{userData['key']}"),
+                        bgcolor="#ffffff",  # لون الخلفية
+                        border=border.all(0.5, "#110b22"),  # إطار الحاوية
+                        border_radius=border_radius.all(5),  # حواف مستديرة
+                        on_click=lambda x: self.copy(f"{userData['key']}"),  # حدث النسخ
                     ),
-                    Container(height=10),
+                    Container(height=10),  # مسافة بين العناصر
                     Container(
                         content=Text(
-                            "أو إمسح رمز (QR) للحصول على المفتاح",
+                            "أو إمسح رمز (QR) للحصول على المفتاح",  # نص التعليمات
                             size=13,
                             weight=FontWeight.NORMAL,
-                            color="#666666",
-                            font_family="ElMessiri",
+                            color="#666666",  # لون النص
+                            font_family="ElMessiri",  # نوع الخط
                         ),
                     ),
                     Container(
                         content=Column(
                             controls=[
-                                Image(src_base64=qr, width=200),
+                                Image(src_base64=qr, width=200),  # عرض رمز QR
                                 Container(
                                     content=Text(
-                                        "امسح رمز (QR)",
+                                        "امسح رمز (QR)",  # نص التعليمات
                                         size=14,
                                         weight=FontWeight.NORMAL,
-                                        color="#666666",
-                                        font_family="ElMessiri",
+                                        color="#666666",  # لون النص
+                                        font_family="ElMessiri",  # نوع الخط
                                     ),
                                 ),
                             ],
-                            horizontal_alignment=CrossAxisAlignment.CENTER,
-                            alignment=MainAxisAlignment.CENTER,
+                            horizontal_alignment=CrossAxisAlignment.CENTER,  # محاذاة العناصر في المنتصف
+                            alignment=MainAxisAlignment.CENTER,  # محاذاة العناصر في المنتصف
                         ),
-                        bgcolor="#ffffff",
-                        border=border.all(color="#110b22", width=1),
-                        border_radius=border_radius.all(10),
-                        padding=padding.symmetric(vertical=10),
+                        bgcolor="#ffffff",  # لون الخلفية
+                        border=border.all(color="#110b22", width=1),  # إطار الحاوية
+                        border_radius=border_radius.all(10),  # حواف مستديرة
+                        padding=padding.symmetric(vertical=10),  # الحشو الداخلي
                     ),
                 ],
-                expand=True,
+                expand=True,  # توسيع الصف لملء المساحة المتاحة
             )
         )
-        self.update()
+        self.update()  # تحديث الواجهة
 
-    def hasFatherScreen(self):
-        self.controls.clear()
+    # دالة عرض واجهة المستخدم عندما يوجد أب مرتبط
+    # تعرض واجهة تحتوي على معلومات الأب وخيارات المراقبة
+    def hasFatherScreen(self, userData):
+        self.controls.clear()  # مسح العناصر الحالية
+        self.scroll = ScrollMode.ALWAYS  # تمكين التمرير
         self.controls.append(
             ResponsiveRow(
                 controls=[
-                    Container(height=10),
+                    Container(height=10),  # مسافة بين العناصر
                     Column(
                         controls=[
                             Container(
-                                content=Image(src="images/father.png", width=150),
+                                content=Image(
+                                    src=(
+                                        "images/father.png"
+                                        if f"{userData['father_gender']}" == "1"
+                                        else "images/mather.png"
+                                    ),  # عرض صورة الأب أو الأم بناءً على الجنس
+                                    width=150,  # عرض الصورة
+                                ),
                             ),
                             Container(
                                 content=Text(
-                                    "اسم الاب",
+                                    f"{userData['father_first_name']}",  # عرض اسم الأب الأخير
                                     size=20,
                                     weight=FontWeight.BOLD,
-                                    color="#666666",
-                                    font_family="ElMessiri",
+                                    color="#666666",  # لون النص
+                                    font_family="ElMessiri",  # نوع الخط
                                 ),
                             ),
-                            Container(height=20),
+                            Container(height=20),  # مسافة بين العناصر
                             ResponsiveRow(
                                 controls=[
                                     Text(
-                                        "البيانات التي يتم مراقبتها",
+                                        "البيانات التي يتم مراقبتها",  # نص العنوان
                                         style=TextStyle(
                                             size=12,
                                             weight=FontWeight.BOLD,
-                                            font_family="ElMessiri",
+                                            font_family="ElMessiri",  # نوع الخط
                                         ),
-                                        color="#666666",
-                                        text_align=TextAlign.START,
+                                        color="#666666",  # لون النص
+                                        text_align=TextAlign.START,  # محاذاة النص
                                     ),
                                 ],
                             ),
@@ -201,155 +228,159 @@ class Home(View):
                                     controls=[
                                         ListTile(
                                             title=Text(
-                                                "مراقبة استخدام التطبيقات",
+                                                "مراقبة استخدام التطبيقات",  # نص العنصر
                                                 style=TextStyle(
                                                     size=14,
                                                     weight=FontWeight.BOLD,
-                                                    font_family="ElMessiri",
+                                                    font_family="ElMessiri",  # نوع الخط
                                                 ),
                                             ),
                                             trailing=Switch(
-                                                value=self.UsageStatsState,
-                                                active_color="#110b22",
-                                                on_change=self.startGetUsageStats
+                                                value=self.UsageStatsState,  # حالة التبديل
+                                                active_color="#110b22",  # لون التبديل عند التفعيل
+                                                on_change=self.startGetUsageStats,  # حدث التغيير
                                             ),
                                             subtitle=Text(
-                                                "مغلق",
+                                                "مغلق",  # نص الحالة
                                                 style=TextStyle(
                                                     size=10,
                                                     weight=FontWeight.BOLD,
-                                                    font_family="ElMessiri",
+                                                    font_family="ElMessiri",  # نوع الخط
                                                 ),
                                             ),
                                         ),
                                     ],
                                 ),
-                                bgcolor="#ffffff",
-                                border=border.all(0.5, "#110b22"),
-                                border_radius=border_radius.all(5),
-                                alignment=alignment.center,
+                                bgcolor="#ffffff",  # لون الخلفية
+                                border=border.all(0.5, "#110b22"),  # إطار الحاوية
+                                border_radius=border_radius.all(5),  # حواف مستديرة
+                                alignment=alignment.center,  # محاذاة العناصر في المنتصف
                             ),
                             Container(
                                 content=ResponsiveRow(
                                     controls=[
                                         ListTile(
                                             title=Text(
-                                                "مراقبة الشاشة",
+                                                "مراقبة الشاشة",  # نص العنصر
                                                 style=TextStyle(
                                                     size=14,
                                                     weight=FontWeight.BOLD,
-                                                    font_family="ElMessiri",
+                                                    font_family="ElMessiri",  # نوع الخط
                                                 ),
                                             ),
                                             trailing=Switch(
-                                                value=self.screenShotState,
-                                                active_color="#110b22",
-                                                on_change=self.startGetScreenShot,
+                                                value=self.screenShotState,  # حالة التبديل
+                                                active_color="#110b22",  # لون التبديل عند التفعيل
+                                                on_change=self.startGetScreenShot,  # حدث التغيير
                                             ),
                                             subtitle=Text(
-                                                "مغلق",
+                                                "مغلق",  # نص الحالة
                                                 style=TextStyle(
                                                     size=10,
                                                     weight=FontWeight.BOLD,
-                                                    font_family="ElMessiri",
+                                                    font_family="ElMessiri",  # نوع الخط
                                                 ),
                                             ),
                                         ),
                                     ],
                                 ),
-                                bgcolor="#ffffff",
-                                border=border.all(0.5, "#110b22"),
-                                border_radius=border_radius.all(5),
-                                alignment=alignment.center,
+                                bgcolor="#ffffff",  # لون الخلفية
+                                border=border.all(0.5, "#110b22"),  # إطار الحاوية
+                                border_radius=border_radius.all(5),  # حواف مستديرة
+                                alignment=alignment.center,  # محاذاة العناصر في المنتصف
                             ),
-                            Container(height=20),
-                            ResponsiveRow(
-                                controls=[
-                                    Text(
-                                        "ايقاف عمل التطبيق",
-                                        style=TextStyle(
-                                            size=12,
-                                            weight=FontWeight.BOLD,
-                                            font_family="ElMessiri",
-                                        ),
-                                        color="#666666",
-                                        text_align=TextAlign.START,
-                                    ),
-                                ],
-                            ),
-                            ResponsiveRow(
-                                controls=[
-                                    Container(
-                                        content=ListTile(
-                                            title=Text(
-                                                "الغاء الربط مع هاتف الاب",
-                                                style=TextStyle(
-                                                    size=15,
-                                                    weight=FontWeight.BOLD,
-                                                    font_family="ElMessiri",
-                                                ),
-                                            ),
-                                            trailing=IconButton(
-                                                icon=icons.CANCEL,
-                                            ),
-                                        ),
-                                        bgcolor="#ffffff",
-                                        border=border.all(0.5, "#110b22"),
-                                        border_radius=border_radius.all(10),
-                                    ),
-                                ],
-                            ),
+                            Container(height=20),  # مسافة بين العناصر
                         ],
-                        horizontal_alignment=CrossAxisAlignment.CENTER,
-                        alignment=MainAxisAlignment.CENTER,
+                        horizontal_alignment=CrossAxisAlignment.CENTER,  # محاذاة العناصر في المنتصف
+                        alignment=MainAxisAlignment.CENTER,  # محاذاة العناصر في المنتصف
                     ),
                 ],
-                expand=True,
+                expand=True,  # توسيع الصف لملء المساحة المتاحة
             )
         )
-        self.update()
+        self.update()  # تحديث الواجهة
 
+    # دالة يتم تنفيذها عند تحميل الصفحة
+    # تهيئة الحالات الأولية وبدء المهام اللازمة
     def did_mount(self):
-        self.screenShotState = self.page.client_storage.get("screenShotState")
-        self.UsageStatsState = self.page.client_storage.get("UsageStatsState")
-        self.page.run_task(self.getUsageStats)
-        self.page.run_task(self.getBackground)
-        self.loaderUi()
-        self.checkIsThereFather()
+        self.screenShotState = self.page.client_storage.get(
+            "screenShotState"
+        )  # الحصول على حالة مراقبة الشاشة
+        self.UsageStatsState = self.page.client_storage.get(
+            "UsageStatsState"
+        )  # الحصول على حالة مراقبة التطبيقات
+        self.page.run_task(self.getUsageStats)  # بدء مراقبة استخدام التطبيقات
+        self.page.run_task(self.getBackground)  # بدء مراقبة الشاشة
+        self.loaderUi()  # عرض واجهة التحميل
+        self.checkIsThereFather()  # التحقق من وجود أب مرتبط
+        self.page.run_task(self.checkIsTherFatherLoop)  # بدء مهمة التحقق المستمر من وجود أب
 
+    # دالة إنشاء رمز QR باستخدام مفتاح المستخدم
+    # تقوم بإنشاء رمز QR وتعيده كسلسلة نصية مشفرة بـ base64
     def generateQr(self, userData):
-        qrCode = qrcode.make(f"{userData['key']}")
-        buffered = BytesIO()
+        qrCode = qrcode.make(f"{userData['key']}")  # إنشاء رمز QR
+        buffered = BytesIO()  # إنشاء مخزن مؤقت للصورة
+        qrCode.save(buffered, format="PNG")  # حفظ رمز QR كصورة PNG
+        sl = base64.b64encode(buffered.getvalue())  # تشفير الصورة بـ base64
+        resultOfQr = sl.decode("utf-8")  # تحويل النتيجة إلى سلسلة نصية
+        return resultOfQr  # إرجاع رمز QR
 
-        qrCode.save(buffered, format="PNG")
-        sl = base64.b64encode(buffered.getvalue())
-        resultOfQr = sl.decode("utf-8")
-        return resultOfQr
-
+    # دالة إرسال طلب HEAD إلى الخادم
+    # تقوم بإرسال طلب HEAD للتحقق من وجود أب مرتبط
     async def sendHeadRequest(self, url, body={}):
-        access = await self.page.client_storage.get_async("access")
+        access = await self.page.client_storage.get_async(
+            "access"
+        )  # الحصول على رمز الوصول
         headers = {
             "Authorization": f"Bearer {access}",
             "Accept": "*/*",
             "Cache-Control": "no-cache",
         }
         try:
-            response = requests.head(
-                url=f"{Home.baseUrl}/{url}/", data=body, headers=headers
+            response = requests.get(
+                url=f"{Home.baseUrl}/{url}/?type=", data=body, headers=headers
             )
-            
+            json = response.json()  # تحويل الاستجابة إلى JSON
             if response.status_code == 200:
-                print(response)
-                return [True, "has"]
-            else:
-                return [False, "hasNo"]
+                userData = (
+                    {
+                        "username": json["username"],
+                        "gender": json["gender"],
+                        "first_name": json["first_name"],
+                        "last_name": json["last_name"],
+                        "profileImage": json["profileImage"],
+                        "key": json["key"],
+                    }
+                    if not json.get("father_gender", None)
+                    else {
+                        "username": json["username"],
+                        "gender": json["gender"],
+                        "first_name": json["first_name"],
+                        "last_name": json["last_name"],
+                        "profileImage": json["profileImage"],
+                        "key": json["key"],
+                        "father_last_name": json["father_last_name"],
+                        "father_gender": json["father_gender"],
+                        "father_first_name": json["father_first_name"],
+                    }
+                )
+                if json.get("father_gender", None):
+                    await self.page.client_storage.set_async("userData", userData)
+                    return [True, "has"]  # إرجاع النتيجة إذا كان هناك أب
+                else:
+                    await self.page.client_storage.set_async("userData", userData)
+                    return [False, "hasNo"]  # إرجاع النتيجة إذا لم يكن هناك أب
         except requests.exceptions.Timeout:
-            return [False, "اتصال الانترنت بطئ"]
+            return [False, "اتصال الانترنت بطئ"]  # إرجاع رسالة خطأ في حالة انتهاء المهلة
         except requests.exceptions.ConnectionError:
-            return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]
+            return [False, "حدث خطأ في الاتصال بالخادم. تحقق من اتصالك بالإنترنت."]  # إرجاع رسالة خطأ في حالة فشل الاتصال
 
+    # دالة مراقبة الشاشة ورفع لقطات الشاشة إلى الخادم
+    # تقوم بالتقاط لقطات الشاشة ورفعها إلى الخادم بشكل دوري
     async def getBackground(self):
-        access = await self.page.client_storage.get_async("access")
+        access = await self.page.client_storage.get_async(
+            "access"
+        )  # الحصول على رمز الوصول
         headers = {
             "Authorization": f"Bearer {access}",
             "Accept": "*/*",
@@ -385,8 +416,12 @@ class Home(View):
 
             await asyncio.sleep(5)
 
+    # دالة مراقبة استخدام التطبيقات ورفع البيانات إلى الخادم
+    # تقوم بجمع بيانات استخدام التطبيقات ورفعها إلى الخادم بشكل دوري
     async def getUsageStats(self):
-        access = await self.page.client_storage.get_async("access")
+        access = await self.page.client_storage.get_async(
+            "access"
+        )  # الحصول على رمز الوصول
         headers = {
             "Authorization": f"Bearer {access}",
             "Accept": "*/*",
@@ -403,7 +438,9 @@ class Home(View):
                 response = requests.get("http://localhost:8080/usage-stats")
                 if response.status_code == 200:
                     upload_response = requests.post(
-                        f"{Home.baseUrl}/mostUseApps/", data=response.json(), headers=headers
+                        f"{Home.baseUrl}/mostUseApps/",
+                        data=response.json(),
+                        headers=headers,
                     )
                     if upload_response.status_code == 200:
                         print("✅ تم رفع الصورة بنجاح")
@@ -420,34 +457,41 @@ class Home(View):
 
             await asyncio.sleep(5)
 
+    # دالة عرض رسالة للمستخدم
+    # تقوم بعرض رسالة (SnackBar) للمستخدم
     def showMessage(self, message):
         snack_bar = SnackBar(
             content=Text(
                 f"{message}",
-                style=TextStyle(size=15, font_family="ElMessiri"),
+                style=TextStyle(size=15, font_family="ElMessiri"),  # تنسيق النص
             ),
-            show_close_icon=True,
+            show_close_icon=True,  # إظهار زر الإغلاق
         )
-        self.page.open(snack_bar)
+        self.page.open(snack_bar)  # عرض الرسالة
 
+    # دالة بدء أو إيقاف مراقبة الشاشة
+    # تقوم بتفعيل أو إيقاف مراقبة الشاشة بناءً على حالة التبديل
     def startGetScreenShot(self, stateus):
         def start(self):
             if stateus.data == "true":
                 if not self.screenShotState:
                     self.page.client_storage.set("screenShotState", True)
-                    self.screenShotState = True  
+                    self.screenShotState = True
                     self.page.run_task(self.getBackground)
                     self.showMessage("✅ تم البدء في التقاط الشاشة")
             else:
-                self.screenShotState = False  
+                self.screenShotState = False
                 self.page.client_storage.set("screenShotState", False)
                 self.showMessage("⏹️ تم إيقاف التقاط الشاشة")
+
         if self.page.client_storage.contains_key("screenShotState"):
             start(self)
         else:
-            self.page.client_storage.set("screenShotState" , True)
+            self.page.client_storage.set("screenShotState", True)
             start(self)
 
+    # دالة بدء أو إيقاف مراقبة استخدام التطبيقات
+    # تقوم بتفعيل أو إيقاف مراقبة استخدام التطبيقات بناءً على حالة التبديل
     def startGetUsageStats(self, stateus):
         def start(self):
             if stateus.data == "true":
@@ -458,15 +502,17 @@ class Home(View):
                     self.showMessage("✅ تم البدء في مراقبة التطبقات ")
             else:
                 self.UsageStatsState = False
-                self.page.client_storage.set("UsageStatsState", False) 
+                self.page.client_storage.set("UsageStatsState", False)
                 self.showMessage("⏹️ تم إيقاف  مراقبة التطبيقات")
-                
+
         if self.page.client_storage.contains_key("UsageStatsState"):
             start(self)
         else:
-            self.page.client_storage.set("UsageStatsState" , True)
+            self.page.client_storage.set("UsageStatsState", True)
             start(self)
 
+    # دالة عرض واجهة التحميل
+    # تعرض واجهة تحميل (ProgressRing) أثناء انتظار اكتمال المهام
     def loaderUi(self):
         self.scroll = None
         self.controls.clear()
@@ -474,34 +520,62 @@ class Home(View):
             Column(
                 controls=[
                     Container(
-                        content=ProgressRing(visible=True),  # Progress ring loader
-                        alignment=alignment.center,
-                        height=float("inf"),  # Make the container take full height
-                        expand=True,  # Ensure the container expands to fill available space
+                        content=ProgressRing(visible=True),  # حلقة التقدم
+                        alignment=alignment.center,  # محاذاة الحلقة في المنتصف
+                        height=float("inf"),  # جعل الحاوية تأخذ الارتفاع الكامل
+                        expand=True,  # توسيع الحاوية لملء المساحة المتاحة
                     ),
                 ],
-                expand=True,  # Make the column expand to take up all available space
+                expand=True,  # توسيع العمود لملء المساحة المتاحة
             )
         )
-        self.update()
+        self.update()  # تحديث الواجهة
 
+    # دالة التعامل مع تغيير العنصر المحدد في القائمة الجانبية
+    # تقوم بالانتقال إلى الصفحة المحددة أو تسجيل الخروج
     def handle_change(self, e):
         routs = {
             "0": "/home",
             "1": "/",
         }
         if routs[e.data] == "/":
-            self.page.client_storage.clear()
-        self.page.go(routs[e.data])
-        self.page.close(self.drawer)
+            self.page.client_storage.clear()  # مسح التخزين المحلي
+        self.page.go(routs[e.data])  # الانتقال إلى الصفحة المحددة
+        self.page.close(self.drawer)  # إغلاق القائمة الجانبية
 
+    # دالة التحقق من وجود أب مرتبط
+    # تقوم بالتحقق من وجود أب مرتبط وعرض الواجهة المناسبة
     def checkIsThereFather(self):
-        state, result = self.page.run_task(self.sendHeadRequest, "Children").result()
+        state, _ = self.page.run_task(self.sendHeadRequest, "Children").result()
         if not state:
-            self.hasNoFather()
+            userData = self.page.client_storage.get("userData")
+            self.hasNoFather(userData)  # عرض واجهة بدون أب
         else:
-            self.hasFatherScreen()
+            userData = self.page.client_storage.get("userData")
+            self.hasFatherScreen(userData)  # عرض واجهة مع أب
 
+    # دالة التحقق المستمر من وجود أب مرتبط
+    # تقوم بالتحقق بشكل دوري من وجود أب مرتبط وتحديث الواجهة
+    async def checkIsTherFatherLoop(self):
+        while self.checkIsThereFatherVar:
+            await asyncio.sleep(10)
+            state, result = await self.sendHeadRequest("Children")
+            if not self.checkIsThereFatherVar:
+                break
+            if state:
+                userData = await self.page.client_storage.get_async("userData")
+                self.hasFatherScreen(userData)
+            else:
+                self.screenShotState = False  # إيقاف مراقبة الشاشة
+                self.UsageStatsState = False  # إيقاف مراقبة استخدام التطبيقات
+                await self.page.client_storage.set_async("UsageStatsState", False)
+                await self.page.client_storage.set_async("screenShotState", False)
+                userData = await self.page.client_storage.get_async("userData")
+                self.hasNoFather(userData)
+
+    # دالة يتم تنفيذها عند إغلاق الصفحة
+    # تقوم بإيقاف جميع المهام وإعادة تعيين الحالات
     def will_unmount(self):
-        self.screenShotState = False
-        self.UsageStatsState = False
+        self.screenShotState = False  # إيقاف مراقبة الشاشة
+        self.UsageStatsState = False  # إيقاف مراقبة استخدام التطبيقات
+        self.checkIsThereFatherVar = False  # إيقاف التحقق المستمر من وجود أب
