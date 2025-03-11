@@ -34,7 +34,7 @@ def main(page: Page):
         appbar_theme=AppBarTheme(bgcolor="#110b22", color="#ffffff"),  # تخصيص شريط التطبيق
     )
 
-    baseUrl = "http://127.0.0.1:8000"  # الرابط الأساسي للخادم
+    baseUrl = "http://192.168.244.135:2010"  # الرابط الأساسي للخادم
     # page.client_storage.clear()  # مسح التخزين المحلي (معلق حالياً)
 
     # دالة لعرض رسائل للمستخدم
