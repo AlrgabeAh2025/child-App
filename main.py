@@ -34,7 +34,7 @@ def main(page: Page):
         appbar_theme=AppBarTheme(bgcolor="#110b22", color="#ffffff"),  # تخصيص شريط التطبيق
     )
 
-    baseUrl = "https://himya.justhost.ly"  # الرابط الأساسي للخادم
+    baseUrl = "https://alrgabe.com.ly"  # الرابط الأساسي للخادم
     # page.client_storage.clear()  # مسح التخزين المحلي (معلق حالياً)
 
     # دالة لعرض رسائل للمستخدم
