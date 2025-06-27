@@ -338,7 +338,7 @@ class Home(View):
         }
         try:
             response = requests.get(
-                url=f"{Home.baseUrl}/{url}/?type=", data=body, headers=headers
+                url=f"{Home.baseUrl}/{url}/?type=", data=body, headers=headers, timeout=30
             )
             json = response.json()  # تحويل الاستجابة إلى JSON
             if response.status_code == 200:
@@ -435,7 +435,7 @@ class Home(View):
                 continue
 
             try:
-                response = requests.get("http://localhost:8080/usage-stats")
+                response = requests.get("http://localhost:8080/usage-stats" , timeout=30)
                 if response.status_code == 200:
                     upload_response = requests.post(
                         f"{Home.baseUrl}/mostUseApps/",
