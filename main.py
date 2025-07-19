@@ -35,7 +35,7 @@ def main(page: Page):
     )
 
     baseUrl = "https://alrgabe.com.ly"  # الرابط الأساسي للخادم
-    page.client_storage.clear()  # مسح التخزين المحلي (معلق حالياً)
+    # page.client_storage.clear()  # مسح التخزين المحلي (معلق حالياً)
 
     # دالة لعرض رسائل للمستخدم
     def showMessage(text):
